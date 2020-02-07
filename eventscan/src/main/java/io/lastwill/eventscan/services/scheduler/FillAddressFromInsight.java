@@ -9,6 +9,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import javax.annotation.PostConstruct;
 import java.io.IOException;
 import java.net.URL;
 import java.util.*;
@@ -24,13 +25,16 @@ public class FillAddressFromInsight {
     @Autowired
     FillBalanceFromInsight balanceFiller;
 
+    long timerToSleep = 10000;
+    long timerMaxValue = 4800000;
+
     private final String URI_INFO = "https://oldins.ducatus.io/insight-lite-api/status?q=getInfo";
     private final String URI_BLOCK_INDEX = "https://oldins.ducatus.io/insight-lite-api/block-index/";
     private final String URI_BLOCK = "https://oldins.ducatus.io/insight-lite-api/block/";
     private final String URI_TX = "https://oldins.ducatus.io/insight-lite-api/tx/";
 
 
-//    @PostConstruct
+    @PostConstruct
     public void fillAddresses() {
 
         DucatusAddressInfo ducatusAddressInfo = null;
@@ -71,7 +75,21 @@ public class FillAddressFromInsight {
                 }
             }
         } catch (IOException ex) {
-            ex.printStackTrace();
+            if (ex.getMessage().contains("429")) {
+                try {
+                    Thread.sleep(timerToSleep);
+                    String errMessage = getErrMessage();
+                    log.error(errMessage);
+                    if(timerToSleep > timerMaxValue ) {
+                        timerToSleep = timerMaxValue;
+                    } else if (timerToSleep < timerMaxValue) {
+                        timerToSleep *= 2;
+                    }
+
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+            }
         }
         saveAddresses(addresses);
     }
@@ -92,5 +110,12 @@ public class FillAddressFromInsight {
             log.warn("addresses from insight are empty");
         }
         balanceFiller.fillBalances();
+    }
+
+    String getErrMessage() {
+        double hours = timerToSleep / 1000 / 60 / 60;
+        double minutes = timerToSleep / 1000 / 60 % 60;
+        double seconds = timerToSleep / 1000 % 60;
+    return String.format("Exception, error 429, wait for %f:%f:%f", hours, minutes, seconds);
     }
 }

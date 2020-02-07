@@ -27,7 +27,7 @@ public class FillAddressFromCli {
     @Autowired
     private FillBalanceCli balanceCli;
 
-    @PostConstruct
+//    @PostConstruct
     public void fillAddresses() {
         try {
             Set<String> addresses = new HashSet<>();
