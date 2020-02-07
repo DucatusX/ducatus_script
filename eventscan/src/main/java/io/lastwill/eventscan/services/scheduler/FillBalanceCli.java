@@ -1,7 +1,9 @@
 package io.lastwill.eventscan.services.scheduler;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
+import com.neemre.btcdcli4j.core.BitcoindException;
+import com.neemre.btcdcli4j.core.CommunicationException;
 import com.neemre.btcdcli4j.core.client.BtcdClient;
+import com.neemre.btcdcli4j.core.domain.AddressBalance;
 import io.lastwill.eventscan.model.DucatusTransitionEntry;
 import io.lastwill.eventscan.repositories.DucatusTransitionEntryRepository;
 import lombok.extern.slf4j.Slf4j;
@@ -21,10 +23,25 @@ public class FillBalanceCli {
 
     public void fillBalances() {
         List<DucatusTransitionEntry> entries = repository.findAll();
-        ObjectMapper objectMapper = new ObjectMapper();
-        entries.forEach(e -> {
+        for (DucatusTransitionEntry e : entries) {
             String address = e.getAddress();
-            BigInteger amount = client.getAddressBalance(address);
+            BigInteger amount = null;
+            try {
+                AddressBalance addressBalance = client.getAddressBalance(address);
+                if (addressBalance == null) {
+                    log.warn("address balance is null on address {}", address);
+                    continue;
+                }
+            } catch (BitcoindException ex) {
+                log.error("BitcoinD exception");
+                if(ex.getCode() == -5) {
+                    continue;
+                }
+                ex.printStackTrace();
+            } catch (CommunicationException ex) {
+                ex.printStackTrace();
+                continue;
+            }
             if (amount != null) {
                 e.setAmount(amount);
                 repository.save(e);
@@ -32,7 +49,7 @@ public class FillBalanceCli {
             } else {
                 log.warn("Can't read balance by address {}, balacne is null", address);
             }
-        });
+        }
         log.debug("FILL ADDRESSES BY BALANCES COMPLETED");
     }
 }

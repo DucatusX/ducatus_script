@@ -28,32 +28,39 @@ public class FillAddressFromCli {
     private FillBalanceCli balanceCli;
 
     @PostConstruct
-    public void fillAddresses() throws BitcoindException, CommunicationException {
+    public void fillAddresses() {
+        try {
+            Set<String> addresses = new HashSet<>();
+            int lastBlock = client.getBlockCount();
 
-        Set<String> addresses = new HashSet<>();
-        int lastBlock = client.getBlockCount();
-        for (int i = 1; i < lastBlock; i++) {
-            String hash = client.getBlockHash(i);
-            Block block = client.getBlock(hash);
-            List<String> txs = block.getTx();
-            if (txs == null || txs.isEmpty()) {
-                log.info("tx is null on {} block", i);
-                continue;
-            }
-            for (String tx : txs) {
-                RedeemScript script = client.decodeScript(tx);
-                if (script == null || script.getP2sh() == null || script.getP2sh().isEmpty()) {
-                    log.info("address is empty  on {} block tx {}", i, tx);
+            for (int i = 1; i < lastBlock; i++) {
+                String hash = client.getBlockHash(i);
+                Block block = client.getBlock(hash);
+
+                List<String> txs = block.getTx();
+                if (txs == null || txs.isEmpty()) {
+                    log.info("tx is null on {} block", i);
                     continue;
                 }
-                String address = script.getP2sh();
-                addresses.add(address);
-            }
-            log.info("addresses size is {} on block {}", addresses.size(), i);
-            if (addresses.size() % 10000 == 0) {
-                saveAddresses(addresses);
+                for (String tx : txs) {
+                    RedeemScript script = client.decodeScript(tx);
+                    if (script == null || script.getP2sh() == null || script.getP2sh().isEmpty()) {
+                        log.info("address is empty  on {} block tx {}", i, tx);
+                        continue;
+                    }
+                    String address = script.getP2sh();
+                    addresses.add(address);
+                }
+                log.info("addresses size is {} on block {}", addresses.size(), i);
+                if (addresses.size() % 10000 == 0 && addresses.size() > 0) {
+                    saveAddresses(addresses);
+                }
             }
             saveAddresses(addresses);
+        } catch (BitcoindException e) {
+            e.printStackTrace();
+        } catch (CommunicationException e) {
+            e.printStackTrace();
         }
     }
 
