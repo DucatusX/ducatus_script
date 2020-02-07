@@ -9,7 +9,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import javax.annotation.PostConstruct;
 import java.io.IOException;
 import java.net.URL;
 import java.util.*;
@@ -22,13 +21,16 @@ public class FillAddressFromInsight {
     BtcdClient btcdClient;
     @Autowired
     private DucatusTransitionEntryRepository repository;
+    @Autowired
+    FillBalanceFromInsight balanceFiller;
+
     private final String URI_INFO = "https://oldins.ducatus.io/insight-lite-api/status?q=getInfo";
     private final String URI_BLOCK_INDEX = "https://oldins.ducatus.io/insight-lite-api/block-index/";
     private final String URI_BLOCK = "https://oldins.ducatus.io/insight-lite-api/block/";
     private final String URI_TX = "https://oldins.ducatus.io/insight-lite-api/tx/";
 
 
-    @PostConstruct
+//    @PostConstruct
     public void fillAddresses() {
 
         DucatusAddressInfo ducatusAddressInfo = null;
@@ -62,7 +64,7 @@ public class FillAddressFromInsight {
                         }
                         addresses.addAll(Arrays.asList(addressesTemp));
                         log.info("addresses size is {}", addresses.size());
-                        if (addresses.size() % 100 == 0) {
+                        if (addresses.size() % 100 == 0 && addresses.size() > 0) {
                             saveAddresses(addresses);
                         }
                     }
@@ -89,5 +91,6 @@ public class FillAddressFromInsight {
         } else {
             log.warn("addresses from insight are empty");
         }
+        balanceFiller.fillBalances();
     }
 }

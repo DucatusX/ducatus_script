@@ -6,6 +6,7 @@ import io.lastwill.eventscan.repositories.DucatusTransitionEntryRepository;
 import io.mywish.scanner.model.DucatusAddressInfo;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
 
 import java.io.IOException;
 import java.math.BigInteger;
@@ -13,15 +14,13 @@ import java.net.URL;
 import java.util.List;
 
 @Slf4j
-//@Component
+@Component
 public class FillBalanceFromInsight {
     @Autowired
     private DucatusTransitionEntryRepository repository;
     private final String URI_PREFIX = "https://oldins.ducatus.io/insight-lite-api/addr/";
     private final String URI_POSTFIX = "";
 
-
-    //    @PostConstruct
     public void fillBalances() {
         List<DucatusTransitionEntry> entries = repository.findAll();
         ObjectMapper objectMapper = new ObjectMapper();

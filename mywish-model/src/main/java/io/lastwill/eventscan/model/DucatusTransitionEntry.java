@@ -12,11 +12,11 @@ import java.math.BigInteger;
 @Getter
 @Setter
 @Entity
-@Table(name = "ducatus_transition",  uniqueConstraints = {@UniqueConstraint(columnNames = {"address"})})
+@Table(name = "ducatus_transition")
 public class DucatusTransitionEntry extends AbstractTransactionEntry {
 
     private BigInteger amount;
-    @Column(name = "address")
+    @Column(name = "address", unique = true)
     private String address;
 
     protected DucatusTransitionEntry() {

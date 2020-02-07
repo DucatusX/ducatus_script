@@ -147,7 +147,7 @@
                 <configuration>
                     <mainClass>io.lastwill.eventscan.Application</mainClass>
                     <executable>true</executable>
-                    <finalName>daps</finalName>
+                    <finalName>ducscript</finalName>
                 </configuration>
                 <executions>
                     <execution>

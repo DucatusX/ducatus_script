@@ -1,17 +1,17 @@
 package io.lastwill.eventscan.services.scheduler;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
+import com.neemre.btcdcli4j.core.BitcoindException;
+import com.neemre.btcdcli4j.core.CommunicationException;
 import com.neemre.btcdcli4j.core.client.BtcdClient;
+import com.neemre.btcdcli4j.core.domain.Block;
+import com.neemre.btcdcli4j.core.domain.RedeemScript;
 import io.lastwill.eventscan.model.DucatusTransitionEntry;
 import io.lastwill.eventscan.repositories.DucatusTransitionEntryRepository;
-import io.mywish.scanner.model.*;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import javax.annotation.PostConstruct;
-import java.io.IOException;
-import java.net.URL;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -24,50 +24,35 @@ public class FillAddressFromCli {
     @Autowired
     private DucatusTransitionEntryRepository repository;
 
-//    @PostConstruct
-//    public void fillAddresses() {
-//
-//        DucatusAddressInfo ducatusAddressInfo = null;
-//        Set<String> addresses = new HashSet<>();
-//        try {
-//            int lastBlock = mapper.readValue(new URL(URI_INFO), Inf.class).getInfo().getBlocks();
-//            for (int i = 1; i < lastBlock; i++) {
-//                String blockHash = mapper.readValue(new URL(URI_BLOCK_INDEX.concat(String.valueOf(i))), BlockIndex.class).getBlockHash();
-//                String[] tx = mapper.readValue(new URL(URI_BLOCK.concat(blockHash)), Block.class).getTx();
-//                if (tx == null) {
-//                    log.info("tx is null on {} block", i);
-//                    continue;
-//                }
-//                for (String s : tx) {
-//                    Tx map = mapper.readValue(new URL(URI_TX.concat(s)), Tx.class);
-//                    Tx.Vout[] vouts = map.getVout();
-//                    if (vouts == null) {
-//                        log.info("vout is null on {} block, tx = {}", i, tx);
-//                        continue;
-//                    }
-//                    log.info("{} block have {} vout", i, vouts.length);
-//                    for (Tx.Vout vout : vouts) {
-//                        Tx.ScriptPubKey tempScript = vout.getScriptPubKey();
-//                        if (tempScript == null) {
-//                            continue;
-//                        }
-//                        String[] addressesTemp = tempScript.getAddresses();
-//                        if (addressesTemp == null || addressesTemp.length == 0) {
-//                            continue;
-//                        }
-//                        addresses.addAll(Arrays.asList(addressesTemp));
-//                        log.info("addresses size is {}", addresses.size());
-//                        if (addresses.size() % 100 == 0) {
-//                            saveAddresses(addresses);
-//                        }
-//                    }
-//                }
-//            }
-//        } catch (IOException ex) {
-//            ex.printStackTrace();
-//        }
-//        saveAddresses(addresses);
-//    }
+    @PostConstruct
+    public void fillAddresses() throws BitcoindException, CommunicationException {
+
+        Set<String> addresses = new HashSet<>();
+        int lastBlock = client.getBlockCount();
+        for (int i = 1; i < lastBlock; i++) {
+            String hash = client.getBlockHash(i);
+            Block block = client.getBlock(hash);
+            List<String> txs = block.getTx();
+            if (txs == null || txs.isEmpty()) {
+                log.info("tx is null on {} block", i);
+                continue;
+            }
+            for (String tx : txs) {
+                RedeemScript script = client.decodeScript(tx);
+                if (script == null || script.getP2sh() == null || script.getP2sh().isEmpty()) {
+                    log.info("address is empty  on {} block tx {}", i, tx);
+                    continue;
+                }
+                String address = script.getP2sh();
+                addresses.add(address);
+            }
+            log.info("addresses size is {} on block {}", addresses.size(), i);
+            if (addresses.size() % 10000 == 0) {
+                saveAddresses(addresses);
+            }
+            saveAddresses(addresses);
+        }
+    }
 
     private void saveAddresses(Collection addresses) {
         Set<String> temp = new HashSet<>(addresses);
