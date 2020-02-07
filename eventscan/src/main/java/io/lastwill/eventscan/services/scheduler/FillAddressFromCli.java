@@ -24,6 +24,9 @@ public class FillAddressFromCli {
     @Autowired
     private DucatusTransitionEntryRepository repository;
 
+    @Autowired
+    private FillBalanceCli balanceCli;
+
     @PostConstruct
     public void fillAddresses() throws BitcoindException, CommunicationException {
 
@@ -69,5 +72,6 @@ public class FillAddressFromCli {
         } else {
             log.warn("addresses from insight are empty");
         }
+        balanceCli.fillBalances();
     }
 }
