@@ -23,7 +23,7 @@ public class FillAddressFromInsight {
     @Autowired
     private DucatusTransitionEntryRepository repository;
     @Autowired
-    FillBalanceFromInsight balanceFiller;
+    FillBalanceCli balanceFiller;
 
     long timerToSleep = 10000;
     long timerMaxValue = 4800000;
@@ -70,9 +70,11 @@ public class FillAddressFromInsight {
                         log.info("addresses size is {}", addresses.size());
                         if (addresses.size() % 100 == 0 && addresses.size() > 0) {
                             saveAddresses(addresses);
+                            addresses.clear();
                         }
                     }
                 }
+                Thread.sleep(1000);
             }
         } catch (IOException ex) {
             if (ex.getMessage().contains("429")) {
@@ -90,6 +92,8 @@ public class FillAddressFromInsight {
                     e.printStackTrace();
                 }
             }
+        } catch (InterruptedException e) {
+            e.printStackTrace();
         }
         saveAddresses(addresses);
     }

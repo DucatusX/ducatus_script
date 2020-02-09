@@ -52,8 +52,9 @@ public class FillAddressFromCli {
                     addresses.add(address);
                 }
                 log.info("addresses size is {} on block {}", addresses.size(), i);
-                if (addresses.size() % 10000 == 0 && addresses.size() > 0) {
+                if (addresses.size() % 100 == 0 && addresses.size() > 0) {
                     saveAddresses(addresses);
+                    addresses.clear();
                 }
             }
             saveAddresses(addresses);
