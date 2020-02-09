@@ -22,7 +22,7 @@ public class FillBalanceCli {
     private BtcdClient client;
 
     public void fillBalances() {
-        List<DucatusTransitionEntry> entries = repository.findAll();
+        List<DucatusTransitionEntry> entries = repository.findAllByAmountNotNull();
         for (DucatusTransitionEntry e : entries) {
             String address = e.getAddress();
             BigInteger amount = null;
