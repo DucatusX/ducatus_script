@@ -33,7 +33,10 @@ public class FillAddressFromCli {
 //    @PostConstruct
     public void fillAddresses() {
         try {
-            long startBlock = blockRepository.getLastBlockForNetwork(NetworkType.DUC_MAINNET);
+            long startBlock = blockRepository.getLastBlockForNetwork(NetworkType.DUC_SAVE);
+            if(startBlock == 0) {
+                startBlock = 1;
+            }
             Set<String> addresses = new HashSet<>();
             int lastBlock = client.getBlockCount();
 
@@ -60,7 +63,7 @@ public class FillAddressFromCli {
                     saveAddresses(addresses);
                     addresses.clear();
                 }
-                blockRepository.updateLastBlock(NetworkType.DUC_MAINNET, (long) i);
+                blockRepository.updateLastBlock(NetworkType.DUC_SAVE, (long) i);
                 Thread.sleep(100);
             }
             saveAddresses(addresses);

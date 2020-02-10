@@ -43,7 +43,10 @@ public class FillAddressFromInsight {
         ObjectMapper mapper = new ObjectMapper();
         Set<String> addresses = new HashSet<>();
         try {
-            long startBlock = blockRepository.getLastBlockForNetwork(NetworkType.DUC_MAINNET);
+            long startBlock = blockRepository.getLastBlockForNetwork(NetworkType.DUC_SAVE);
+            if(startBlock == 0) {
+                startBlock = 1;
+            }
             int lastBlock = mapper.readValue(new URL(URI_INFO), Inf.class).getInfo().getBlocks();
             for (int i = (int) startBlock; i < lastBlock; i++) {
                 String blockHash = mapper.readValue(new URL(URI_BLOCK_INDEX.concat(String.valueOf(i))), BlockIndex.class).getBlockHash();
@@ -77,7 +80,7 @@ public class FillAddressFromInsight {
                         }
                     }
                 }
-                blockRepository.updateLastBlock(NetworkType.DUC_MAINNET, (long) i);
+                blockRepository.updateLastBlock(NetworkType.DUC_SAVE, (long) i);
                 Thread.sleep(1000);
             }
         } catch (IOException ex) {
