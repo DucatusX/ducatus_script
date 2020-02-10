@@ -16,6 +16,6 @@ public interface AbstractTransactionEntryRepository<T extends AbstractTransactio
 
     boolean existsByTransferStatus(@Param("transferStatus") TransferStatus transferStatus);
 
-    List<T> findAllByAmountIsNull();
+    List<T> findByAmountIsNull();
 
 }

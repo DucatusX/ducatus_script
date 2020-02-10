@@ -9,22 +9,20 @@ import io.lastwill.eventscan.repositories.LastBlockRepository;
 import io.mywish.scanner.model.*;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
 
-import javax.annotation.PostConstruct;
 import java.io.IOException;
 import java.net.URL;
 import java.util.*;
 import java.util.stream.Collectors;
 
 @Slf4j
-@Component
+//@Component
 public class FillAddressFromInsight {
     @Autowired
     BtcdClient btcdClient;
     @Autowired
     private DucatusTransitionEntryRepository repository;
-
+    @Autowired
     FillBalanceCli balanceFiller;
     @Autowired
     private LastBlockRepository blockRepository;
@@ -36,10 +34,6 @@ public class FillAddressFromInsight {
     private final String URI_BLOCK_INDEX = "https://oldins.ducatus.io/insight-lite-api/block-index/";
     private final String URI_BLOCK = "https://oldins.ducatus.io/insight-lite-api/block/";
     private final String URI_TX = "https://oldins.ducatus.io/insight-lite-api/tx/";
-
-    public FillAddressFromInsight() {
-        this.balanceFiller = new FillBalanceCli(repository);
-    }
 
     //    @PostConstruct
     public void fillAddresses() {

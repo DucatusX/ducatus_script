@@ -4,8 +4,8 @@ import com.neemre.btcdcli4j.core.BitcoindException;
 import com.neemre.btcdcli4j.core.CommunicationException;
 import com.neemre.btcdcli4j.core.client.BtcdClient;
 import com.neemre.btcdcli4j.core.domain.AddressBalance;
-import io.lastwill.eventscan.model.DucatusTransitionCli;
-import io.lastwill.eventscan.repositories.DucatusTransitionCliRepository;
+import io.lastwill.eventscan.model.DucatusTransitionEntry;
+import io.lastwill.eventscan.repositories.DucatusTransitionEntryRepository;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -13,21 +13,21 @@ import org.springframework.stereotype.Component;
 import java.math.BigInteger;
 import java.util.List;
 
-@Slf4j
 @Component
-public class FillBalanceCli {
+@Slf4j
+public class FillBalanceMonitor {
     @Autowired
-    private DucatusTransitionCliRepository repository;
+    private DucatusTransitionEntryRepository repository;
 
     @Autowired
     private BtcdClient client;
 
     public void fillBalances() {
-        List<DucatusTransitionCli> entries = repository.findAllByAmountIsNull();
+        List<DucatusTransitionEntry> entries = repository.findAllByAmountIsNull();
         if (entries == null) {
             return;
         }
-        for (DucatusTransitionCli e : entries) {
+        for (DucatusTransitionEntry e : entries) {
             String address = e.getAddress();
             BigInteger amount = null;
             try {
@@ -36,7 +36,6 @@ public class FillBalanceCli {
                     log.warn("address balance is null on address {}", address);
                     continue;
                 }
-                amount = addressBalance.getBalance();
             } catch (BitcoindException ex) {
                 log.error("BitcoinD exception");
                 if (ex.getCode() == -5) {
@@ -58,3 +57,4 @@ public class FillBalanceCli {
         log.debug("FILL ADDRESSES BY BALANCES COMPLETED");
     }
 }
+

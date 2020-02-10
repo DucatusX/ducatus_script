@@ -20,6 +20,7 @@ import java.util.stream.Collectors;
 @Slf4j
 @Component
 public class FillAddressFromCli {
+    @Autowired
     private FillBalanceCli balanceCli;
     @Autowired
     BtcdClient client;
@@ -30,9 +31,6 @@ public class FillAddressFromCli {
     @Autowired
     private LastBlockRepository blockRepository;
 
-    public FillAddressFromCli() {
-        this.balanceCli = new FillBalanceCli(repository);
-    }
 
     @PostConstruct
     public void fillAddresses() {

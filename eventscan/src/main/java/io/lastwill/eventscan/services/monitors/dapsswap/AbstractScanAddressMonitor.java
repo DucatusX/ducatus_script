@@ -3,7 +3,7 @@ package io.lastwill.eventscan.services.monitors.dapsswap;
 import io.lastwill.eventscan.model.DucatusTransitionEntry;
 import io.lastwill.eventscan.model.NetworkType;
 import io.lastwill.eventscan.repositories.DucatusTransitionEntryRepository;
-import io.lastwill.eventscan.services.scheduler.FillBalanceCli;
+import io.lastwill.eventscan.services.scheduler.FillBalanceMonitor;
 import io.mywish.scanner.model.NewBlockEvent;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -17,14 +17,14 @@ import java.util.stream.Collectors;
 @Slf4j
 public abstract class AbstractScanAddressMonitor {
     private final NetworkType networkType;
-    private FillBalanceCli fillBalanceCli;
+    @Autowired
+    private FillBalanceMonitor fillBalanceMonitor;
 
     @Autowired
     private DucatusTransitionEntryRepository transitionEntryRepository;
 
     protected AbstractScanAddressMonitor(NetworkType networkType) {
         this.networkType = networkType;
-        fillBalanceCli = new FillBalanceCli(transitionEntryRepository);
     }
 
     @EventListener
@@ -56,7 +56,7 @@ public abstract class AbstractScanAddressMonitor {
         transitionEntryRepository.save(addressesToSave);
         log.debug("{}. Save {} addresses in {} block.", networkType, addressesToSave.size(), event.getBlock().getNumber());
         if (event.getBlock().getNumber() % 100 == 0) {
-            fillBalanceCli.fillBalances();
+            fillBalanceMonitor.fillBalances();
         }
     }
 }
