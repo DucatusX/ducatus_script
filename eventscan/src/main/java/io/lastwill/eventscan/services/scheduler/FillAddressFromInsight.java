@@ -91,7 +91,7 @@ public class FillAddressFromInsight {
                     } else if (timerToSleep < timerMaxValue) {
                         timerToSleep *= 2;
                     }
-
+                    fillAddresses();
                 } catch (InterruptedException e) {
                     e.printStackTrace();
                 }
