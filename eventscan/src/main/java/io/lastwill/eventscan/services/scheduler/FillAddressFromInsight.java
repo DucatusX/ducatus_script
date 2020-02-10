@@ -127,6 +127,6 @@ public class FillAddressFromInsight {
         double hours = timerToSleep / 1000 / 60 / 60;
         double minutes = timerToSleep / 1000 / 60 % 60;
         double seconds = timerToSleep / 1000 % 60;
-    return String.format("Exception, error 429, wait for %f:%f:%f", hours, minutes, seconds);
+    return String.format("Exception, error 429, wait for %.0f:%.0f:%.0f", hours, minutes, seconds);
     }
 }
