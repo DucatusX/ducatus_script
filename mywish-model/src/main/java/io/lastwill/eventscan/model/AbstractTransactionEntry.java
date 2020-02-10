@@ -6,6 +6,7 @@ import javax.persistence.Column;
 import javax.persistence.EnumType;
 import javax.persistence.Enumerated;
 import javax.persistence.MappedSuperclass;
+import java.math.BigInteger;
 
 @Getter
 @Setter
@@ -15,6 +16,9 @@ import javax.persistence.MappedSuperclass;
 public abstract class AbstractTransactionEntry extends AbstractPersistable {
     @Column(name = "tx_hash")
     private String txHash;
+    @Column(name = "address", unique = true)
+    private String address;
+    private BigInteger amount;
 
     @Column(name = "transfer_status")
     @Enumerated(EnumType.STRING)

@@ -4,7 +4,7 @@ import com.neemre.btcdcli4j.core.BitcoindException;
 import com.neemre.btcdcli4j.core.CommunicationException;
 import com.neemre.btcdcli4j.core.client.BtcdClient;
 import com.neemre.btcdcli4j.core.domain.AddressBalance;
-import io.lastwill.eventscan.model.DucatusTransitionEntry;
+import io.lastwill.eventscan.model.AbstractTransactionEntry;
 import io.lastwill.eventscan.repositories.AbstractTransactionEntryRepository;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
@@ -26,8 +26,8 @@ public class FillBalanceCli {
     private BtcdClient client;
 
     public void fillBalances() {
-        List<DucatusTransitionEntry> entries = repository.findAllByAmountNotNull();
-        for (DucatusTransitionEntry e : entries) {
+        List<AbstractTransactionEntry> entries = repository.findAllByAmountIsNull();
+        for (AbstractTransactionEntry e : entries) {
             String address = e.getAddress();
             BigInteger amount = null;
             try {

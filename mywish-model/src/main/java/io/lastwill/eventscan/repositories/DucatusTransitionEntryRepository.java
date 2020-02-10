@@ -19,7 +19,7 @@ public interface DucatusTransitionEntryRepository extends AbstractTransactionEnt
     List<DucatusTransitionEntry> findByTransferStatusEquals(
             @Param("transferStatus") TransferStatus status);
 
-    List<DucatusTransitionEntry> findAllByAmountNotNull();
+    List<DucatusTransitionEntry> findAllByAmountIsNull();
 
     DucatusTransitionEntry findFirstByTransferStatus(@Param("transferStatus") TransferStatus status);
 
