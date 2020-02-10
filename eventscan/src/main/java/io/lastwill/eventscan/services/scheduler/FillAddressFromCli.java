@@ -6,12 +6,13 @@ import com.neemre.btcdcli4j.core.client.BtcdClient;
 import com.neemre.btcdcli4j.core.domain.Block;
 import com.neemre.btcdcli4j.core.domain.RedeemScript;
 import io.lastwill.eventscan.model.DucatusTransitionEntry;
+import io.lastwill.eventscan.model.NetworkType;
 import io.lastwill.eventscan.repositories.DucatusTransitionEntryRepository;
+import io.lastwill.eventscan.repositories.LastBlockRepository;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import javax.annotation.PostConstruct;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -26,14 +27,17 @@ public class FillAddressFromCli {
 
     @Autowired
     private FillBalanceCli balanceCli;
+    @Autowired
+    private LastBlockRepository blockRepository;
 
 //    @PostConstruct
     public void fillAddresses() {
         try {
+            long startBlock = blockRepository.getLastBlockForNetwork(NetworkType.DUC_MAINNET);
             Set<String> addresses = new HashSet<>();
             int lastBlock = client.getBlockCount();
 
-            for (int i = 1; i < lastBlock; i++) {
+            for (int i = (int) startBlock; i < lastBlock; i++) {
                 String hash = client.getBlockHash(i);
                 Block block = client.getBlock(hash);
 
@@ -56,11 +60,15 @@ public class FillAddressFromCli {
                     saveAddresses(addresses);
                     addresses.clear();
                 }
+                blockRepository.updateLastBlock(NetworkType.DUC_MAINNET, (long) i);
+                Thread.sleep(100);
             }
             saveAddresses(addresses);
         } catch (BitcoindException e) {
             e.printStackTrace();
         } catch (CommunicationException e) {
+            e.printStackTrace();
+        } catch (InterruptedException e) {
             e.printStackTrace();
         }
     }
