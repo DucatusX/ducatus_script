@@ -5,19 +5,23 @@ import com.neemre.btcdcli4j.core.CommunicationException;
 import com.neemre.btcdcli4j.core.client.BtcdClient;
 import com.neemre.btcdcli4j.core.domain.AddressBalance;
 import io.lastwill.eventscan.model.DucatusTransitionEntry;
-import io.lastwill.eventscan.repositories.DucatusTransitionEntryRepository;
+import io.lastwill.eventscan.repositories.AbstractTransactionEntryRepository;
+import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
 
 import java.math.BigInteger;
 import java.util.List;
 
 @Slf4j
-@Component
 public class FillBalanceCli {
-    @Autowired
-    private DucatusTransitionEntryRepository repository;
+    @Setter
+    private AbstractTransactionEntryRepository repository;
+
+    public FillBalanceCli(AbstractTransactionEntryRepository repository) {
+        this.repository = repository;
+    }
+
     @Autowired
     private BtcdClient client;
 
@@ -34,7 +38,7 @@ public class FillBalanceCli {
                 }
             } catch (BitcoindException ex) {
                 log.error("BitcoinD exception");
-                if(ex.getCode() == -5) {
+                if (ex.getCode() == -5) {
                     continue;
                 }
                 ex.printStackTrace();

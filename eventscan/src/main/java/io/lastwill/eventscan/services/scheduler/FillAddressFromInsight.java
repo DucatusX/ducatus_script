@@ -24,7 +24,7 @@ public class FillAddressFromInsight {
     BtcdClient btcdClient;
     @Autowired
     private DucatusTransitionEntryRepository repository;
-    @Autowired
+
     FillBalanceCli balanceFiller;
     @Autowired
     private LastBlockRepository blockRepository;
@@ -37,14 +37,17 @@ public class FillAddressFromInsight {
     private final String URI_BLOCK = "https://oldins.ducatus.io/insight-lite-api/block/";
     private final String URI_TX = "https://oldins.ducatus.io/insight-lite-api/tx/";
 
+    public FillAddressFromInsight() {
+        this.balanceFiller = new FillBalanceCli(repository);
+    }
 
-    @PostConstruct
+    //    @PostConstruct
     public void fillAddresses() {
         ObjectMapper mapper = new ObjectMapper();
         Set<String> addresses = new HashSet<>();
         try {
             long startBlock = blockRepository.getLastBlockForNetwork(NetworkType.DUC_SAVE);
-            if(startBlock == 0) {
+            if (startBlock == 0) {
                 startBlock = 1;
             }
             int lastBlock = mapper.readValue(new URL(URI_INFO), Inf.class).getInfo().getBlocks();
@@ -89,7 +92,7 @@ public class FillAddressFromInsight {
                     Thread.sleep(timerToSleep);
                     String errMessage = getErrMessage();
                     log.error(errMessage);
-                    if(timerToSleep > timerMaxValue ) {
+                    if (timerToSleep > timerMaxValue) {
                         timerToSleep = timerMaxValue;
                     } else if (timerToSleep < timerMaxValue) {
                         timerToSleep *= 2;
@@ -127,6 +130,6 @@ public class FillAddressFromInsight {
         double hours = timerToSleep / 1000 / 60 / 60;
         double minutes = timerToSleep / 1000 / 60 % 60;
         double seconds = timerToSleep / 1000 % 60;
-    return String.format("Exception, error 429, wait for %.0f:%.0f:%.0f", hours, minutes, seconds);
+        return String.format("Exception, error 429, wait for %.0f:%.0f:%.0f", hours, minutes, seconds);
     }
 }
